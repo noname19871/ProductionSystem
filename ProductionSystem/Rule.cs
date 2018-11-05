@@ -10,14 +10,26 @@ namespace ProductionSystem
     {
         private string id;
 
-        private List<Fact> conditions = new List<Fact>();
+        private List<string> conditions = new List<string>();
 
-        private List<Fact> conclusions = new List<Fact>();
+        private string conclusion;
+
+        private int order;
 
         public string Id { get { return id; } }
 
-        public List<Fact> Conditions { get { return conditions; } }
+        public List<string> Conditions { get { return conditions; } }
 
-        public List<Fact> Conclusions { get { return conclusions; } }
+        public string Conclusion { get { return conclusion; } }
+
+        public int Order { get { return order; } set { order = value; } }
+
+        public Rule (string i, List<string> cond, string concl)
+        {
+            id = i;
+            conditions = cond;
+            conclusion = concl;
+            order = 0;
+        }
     }
 }
