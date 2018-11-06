@@ -25,11 +25,16 @@ namespace ProductionSystem
         private List<Rule> rules = new List<Rule>();
 
         //All existing terminal facts
-        private Dictionary<string,Terminal> terminals = new Dictionary<string, Terminal>();
+        private Dictionary<string,Terminal> all_terminals = new Dictionary<string, Terminal>();
+
+        //Terminal fact that have been selected by the user
+        private string choosen_terminal; 
 
         public Form1()
         {
             InitializeComponent();
+            RunForward.Hide();
+            RunBackward.Hide();
         }
 
         private void get_facts(string filename)
@@ -63,7 +68,7 @@ namespace ProductionSystem
                 int sep1 = cur.IndexOf(':');
                 int sep2 = cur.IndexOf(';');
                 Terminal t = new Terminal(cur.Substring(0, sep1 - 1), cur.Substring(sep1 + 2, sep2 - sep1 - 3), cur.Substring(sep2 + 2));
-                terminals[t.Id] = t;
+                all_terminals[t.Id] = t;
                 cur_ind++;
             }
 
@@ -86,44 +91,102 @@ namespace ProductionSystem
 
         }
 
-        private void fill_checked_list()
+        private void fill_checked_list_with_facts()
         {
+            checkedListBox1.Items.Clear();
             foreach (var f in all_facts)
             {
                 checkedListBox1.Items.Add(f.Value.Value);
             }
         }
 
-        private void LoadButton_Click(object sender, EventArgs e)
+        private void fill_checked_list_with_cities()
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            if (ofd.ShowDialog() != DialogResult.OK)
+            checkedListBox1.Items.Clear();
+            foreach (var t in all_terminals)
             {
-                return;
+                checkedListBox1.Items.Add(t.Value.Value);
             }
-            if (!System.IO.File.Exists(ofd.FileName))
-            {
-                return;
-            }
-
-            get_facts(ofd.FileName);
-            fill_checked_list();
         }
 
-        
+        private void LoadFacts_Click(object sender, EventArgs e)
+        {
+            if (all_facts.Count == 0)
+            {
+                OpenFileDialog ofd = new OpenFileDialog();
+                if (ofd.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+                if (!System.IO.File.Exists(ofd.FileName))
+                {
+                    return;
+                }
+                get_facts(ofd.FileName);
+            }
+
+
+            pictureBox1.Image = null;
+            fill_checked_list_with_facts();
+            LoadCities.Hide();
+            RunForward.Show();
+        }
+
+        private void LoadCities_Click(object sender, EventArgs e)
+        {
+            if (all_terminals.Count == 0)
+            {
+                OpenFileDialog ofd = new OpenFileDialog();
+                if (ofd.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+                if (!System.IO.File.Exists(ofd.FileName))
+                {
+                    return;
+                }
+                get_facts(ofd.FileName);
+            }
+
+            pictureBox1.Image = null;
+            fill_checked_list_with_cities();
+            LoadFacts.Hide();
+            RunBackward.Show();
+        }
+
+
 
         private List<Terminal> forward_search()
         {
+            richTextBox1.Text = "";
             List<string> id_choosen = new List<string>(choosen_facts.Keys);
             int step = 0;
 
             List<Rule> rules_to_use = rules.Where(r => r.Conditions.TrueForAll(s => id_choosen.Contains(s))).ToList();
             List<Rule> used_rules = new List<Rule>();
             List<Terminal> res = new List<Terminal>();
+
+            richTextBox1.Text += "Начало прямого поиска \n";
+            richTextBox1.Text += "Введенные факты: \n";
+            foreach (string s in id_choosen)
+                richTextBox1.Text += s + " : " + all_facts[s].Value + "\n";
             while (rules_to_use.Count != 0)
             {
                 step++;
-                richTextBox1.Text += "Шаг #" + step + "\n";
+                richTextBox1.Text += "\nШаг #" + step + "\n";
+                richTextBox1.Text += "--------------------------------------------------------------\n";
+                richTextBox1.Text += "Применяемые правила: \n";
+                foreach(Rule r in rules_to_use)
+                {
+                    richTextBox1.Text += r.Id + " : " + r.Conditions.First();
+                    foreach (string s in r.Conditions)
+                    {
+                        if (s != r.Conditions.First())
+                            richTextBox1.Text += ", " + s;
+                    }
+                    richTextBox1.Text += " -> " + r.Conclusion + "\n";
+                }
+                richTextBox1.Text += "--------------------------------------------------------------\n";
                 richTextBox1.Text += "Полученные факты: \n";
 
                 foreach(Rule r in rules_to_use)
@@ -141,8 +204,8 @@ namespace ProductionSystem
                         }
                         else
                         {
-                            richTextBox1.Text += r.Conclusion + " : " + terminals[r.Conclusion].Value + "\n";
-                            res.Add(terminals[r.Conclusion]);
+                            richTextBox1.Text += r.Conclusion + " : " + all_terminals[r.Conclusion].Value + "\n";
+                            res.Add(all_terminals[r.Conclusion]);
                         }
                     }
                     used_rules.Add(r);
@@ -161,8 +224,66 @@ namespace ProductionSystem
             return res;
         }
 
-        private void RunButton_Click(object sender, EventArgs e)
+        private List<Fact> backward_search()
         {
+            richTextBox1.Text = "";
+            List<string> id_choosen = new List<string>();
+            List<Fact> res = new List<Fact>();
+            id_choosen.Add(choosen_terminal);
+            List<Fact> used_notices = new List<Fact>();
+
+            int step = 0;
+            richTextBox1.Text += "Начало обратного поиска \n";
+            richTextBox1.Text += "Выбранный терминал: \n";
+            richTextBox1.Text += choosen_terminal + " : " + all_terminals[choosen_terminal].Value + "\n";
+            while (id_choosen.Count != 0)
+            {
+                step++;
+                richTextBox1.Text += "\nШаг #" + step + "\n";
+                richTextBox1.Text += "--------------------------------------------------------------\n";
+                richTextBox1.Text += "Применяемое правило: \n";
+
+                string id_to_search = id_choosen.First();
+                id_choosen.Remove(id_to_search);
+
+                foreach (Rule r in rules)
+                {
+                    if (r.Conclusion == id_to_search)
+                    {
+                        richTextBox1.Text += r.Id + " : " + r.Conditions.First();
+                        foreach (string s in r.Conditions)
+                        {
+                            if (s != r.Conditions.First())
+                                richTextBox1.Text += ", " + s;
+                        }
+                        richTextBox1.Text += " -> " + r.Conclusion + "\n";
+                        richTextBox1.Text += "--------------------------------------------------------------\n";
+                        richTextBox1.Text += "Полученные факты: \n";
+                        foreach (string s in r.Conditions)
+                        {
+                            if (s[0] == 'f' && !res.Contains(all_facts[s]))
+                            {
+                                res.Add(all_facts[s]);
+                                richTextBox1.Text += s + " : " + all_facts[s].Value + "\n";
+                            }
+                            else if (s[0] == 'n' && !used_notices.Contains(all_notices[s]))
+                            {
+                                used_notices.Add(all_notices[s]);
+                                id_choosen.Add(s);
+                                richTextBox1.Text += s + " : " + all_notices[s].Value + "\n";
+                            }
+                        }
+                        break;
+                    }
+                }
+
+            }
+            return res;
+        }
+
+        private void RunForward_Click(object sender, EventArgs e)
+        {
+            pictureBox1.Image = null;
             foreach(string s in checkedListBox1.CheckedItems)
             {
                 foreach(var f in all_facts)
@@ -175,9 +296,56 @@ namespace ProductionSystem
             }
 
             List<Terminal> res = forward_search();
-            pictureBox1.Image = new Bitmap(res.First().Img);
+            if (res.Count != 0)
+                pictureBox1.Image = new Bitmap(res.First().Img);
+            choosen_facts.Clear();
         }
 
 
+
+        private void RunBackward_Click(object sender, EventArgs e)
+        {
+            pictureBox1.Image = null;
+            foreach (string s in checkedListBox1.CheckedItems)
+            {
+                foreach (var t in all_terminals)
+                {
+                    if (t.Value.Value == s)
+                    {
+                        choosen_terminal = t.Key;
+                    }
+                }
+            }
+
+            List<Fact> res = backward_search();
+            richTextBox1.Text += "--------------------------------------------------------------\n";
+            richTextBox1.Text += "\nНеобходимые факты для получения искомого терминала: \n";
+            foreach (Fact f in res)
+            {
+                richTextBox1.Text += f.Id + " : " + f.Value + "\n";
+            }
+            pictureBox1.Image = new Bitmap(all_terminals[choosen_terminal].Img);
+
+        }
+
+        private void ClearButton_Click(object sender, EventArgs e)
+        {
+            LoadFacts.Show();
+            LoadCities.Show();
+            RunBackward.Hide();
+            RunForward.Hide();
+            checkedListBox1.Items.Clear();
+            pictureBox1.Image = null;
+            richTextBox1.Text = "";
+        }
+
+        private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            var list = sender as CheckedListBox;
+            if (e.NewValue == CheckState.Checked && RunBackward.Visible)
+                foreach (int index in list.CheckedIndices)
+                    if (index != e.Index)
+                        list.SetItemChecked(index, false);
+        }
     }
 }
