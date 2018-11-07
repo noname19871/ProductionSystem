@@ -10,9 +10,9 @@ f9 : Большая территория
 f10 : Большое население
 f11 : Горный ландшафт
 f12 : Состоит из многих субъектов
-f13 : Офицальный язык - английский
-f14 : Офицальный язык - французский
-f15 : Офицальный язык - немецкий
+f13 : Официальный язык - английский
+f14 : Официальный язык - французский
+f15 : Официальный язык - немецкий
 f16 : Низкая преступность
 f17 : Высокая преступность
 f18 : Высокое развитие
@@ -51,20 +51,20 @@ n16 : Много ресторанов
 n17 : Много баров
 
 t1 : Россия ; ..\..\flags\Russia.png
-t2 : Германия ; ..\..\flags\Russia.png
-t3 : Великобритания ; ..\..\flags\Russia.png
-t4 : Сингапур ; ..\..\flags\Russia.png
-t5 : ОАЭ ; ..\..\flags\Russia.png
-t6 : Франция ; ..\..\flags\Russia.png 
-t7 : Италия ; ..\..\flags\Russia.png
-t8 : Мексика ; ..\..\flags\Russia.png
-t9 : Швейцария ; ..\..\flags\Russia.png
-t10 : Бразилия ; ..\..\flags\Russia.png
-t11 : Китай ; ..\..\flags\Russia.png
-t12 : США ; ..\..\flags\Russia.png
-t13 : Испания ; ..\..\flags\Russia.png
-t14 : Канада ; ..\..\flags\Russia.png
-t15 : Австралия ; ..\..\flags\Russia.png
+t2 : Германия ; ..\..\flags\Germany.png
+t3 : Великобритания ; ..\..\flags\UK.png
+t4 : Сингапур ; ..\..\flags\Singapore.png
+t5 : ОАЭ ; ..\..\flags\UAE.png
+t6 : Франция ; ..\..\flags\France.png 
+t7 : Италия ; ..\..\flags\Italy.png
+t8 : Мексика ; ..\..\flags\Mexico.png
+t9 : Швейцария ; ..\..\flags\Switzerland.png
+t10 : Бразилия ; ..\..\flags\Brazil.png
+t11 : Китай ; ..\..\flags\China.png
+t12 : США ; ..\..\flags\USA.png
+t13 : Испания ; ..\..\flags\Spain.png
+t14 : Канада ; ..\..\flags\Canada.png
+t15 : Австралия ; ..\..\flags\Australia.png
 
 r1 : f1, f5 -> n3
 r2 : f1 -> n5

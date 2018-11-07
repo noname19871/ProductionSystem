@@ -98,7 +98,7 @@
             this.LoadCities.Name = "LoadCities";
             this.LoadCities.Size = new System.Drawing.Size(177, 79);
             this.LoadCities.TabIndex = 6;
-            this.LoadCities.Text = "Load Cities";
+            this.LoadCities.Text = "Load Countries";
             this.LoadCities.UseVisualStyleBackColor = true;
             this.LoadCities.Click += new System.EventHandler(this.LoadCities_Click);
             // 
