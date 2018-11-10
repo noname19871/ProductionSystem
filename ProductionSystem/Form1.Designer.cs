@@ -34,9 +34,10 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.RunForward = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.LoadCities = new System.Windows.Forms.Button();
+            this.LoadCountries = new System.Windows.Forms.Button();
             this.RunBackward = new System.Windows.Forms.Button();
             this.ClearButton = new System.Windows.Forms.Button();
+            this.checkedListBox2 = new System.Windows.Forms.CheckedListBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -56,9 +57,8 @@
             this.checkedListBox1.FormattingEnabled = true;
             this.checkedListBox1.Location = new System.Drawing.Point(584, 12);
             this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(668, 361);
+            this.checkedListBox1.Size = new System.Drawing.Size(332, 364);
             this.checkedListBox1.TabIndex = 2;
-            this.checkedListBox1.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox1_ItemCheck);
             // 
             // LoadFacts
             // 
@@ -88,19 +88,19 @@
             // 
             this.richTextBox1.Location = new System.Drawing.Point(584, 379);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(668, 290);
+            this.richTextBox1.Size = new System.Drawing.Size(668, 273);
             this.richTextBox1.TabIndex = 5;
             this.richTextBox1.Text = "";
             // 
-            // LoadCities
+            // LoadCountries
             // 
-            this.LoadCities.Location = new System.Drawing.Point(195, 379);
-            this.LoadCities.Name = "LoadCities";
-            this.LoadCities.Size = new System.Drawing.Size(177, 79);
-            this.LoadCities.TabIndex = 6;
-            this.LoadCities.Text = "Load Countries";
-            this.LoadCities.UseVisualStyleBackColor = true;
-            this.LoadCities.Click += new System.EventHandler(this.LoadCities_Click);
+            this.LoadCountries.Location = new System.Drawing.Point(195, 379);
+            this.LoadCountries.Name = "LoadCountries";
+            this.LoadCountries.Size = new System.Drawing.Size(177, 79);
+            this.LoadCountries.TabIndex = 6;
+            this.LoadCountries.Text = "Load Countries";
+            this.LoadCountries.UseVisualStyleBackColor = true;
+            this.LoadCountries.Click += new System.EventHandler(this.LoadCountries_Click);
             // 
             // RunBackward
             // 
@@ -122,14 +122,24 @@
             this.ClearButton.UseVisualStyleBackColor = true;
             this.ClearButton.Click += new System.EventHandler(this.ClearButton_Click);
             // 
+            // checkedListBox2
+            // 
+            this.checkedListBox2.FormattingEnabled = true;
+            this.checkedListBox2.Location = new System.Drawing.Point(922, 9);
+            this.checkedListBox2.Name = "checkedListBox2";
+            this.checkedListBox2.Size = new System.Drawing.Size(332, 364);
+            this.checkedListBox2.TabIndex = 9;
+            this.checkedListBox2.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox2_ItemCheck);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 27F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1264, 681);
+            this.ClientSize = new System.Drawing.Size(1258, 664);
+            this.Controls.Add(this.checkedListBox2);
             this.Controls.Add(this.ClearButton);
             this.Controls.Add(this.RunBackward);
-            this.Controls.Add(this.LoadCities);
+            this.Controls.Add(this.LoadCountries);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.RunForward);
             this.Controls.Add(this.LoadFacts);
@@ -154,9 +164,10 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Button RunForward;
         private System.Windows.Forms.RichTextBox richTextBox1;
-        private System.Windows.Forms.Button LoadCities;
+        private System.Windows.Forms.Button LoadCountries;
         private System.Windows.Forms.Button RunBackward;
         private System.Windows.Forms.Button ClearButton;
+        private System.Windows.Forms.CheckedListBox checkedListBox2;
     }
 }
 

@@ -46,7 +46,7 @@ namespace ProductionSystem
             {
                 string cur = lines[cur_ind];
                 int sep = cur.IndexOf(':');
-                Fact f = new Fact( cur.Substring(0, sep - 1), cur.Substring(sep + 2));
+                Fact f = new Fact( cur.Substring(0, sep - 1), cur.Substring(sep + 2), 0);
                 all_facts[f.Id] = f;
                 cur_ind++;
             }
@@ -55,8 +55,9 @@ namespace ProductionSystem
             while (cur_ind < lines.Count && lines[cur_ind] != "" && lines[cur_ind][0] == 'n')
             {
                 string cur = lines[cur_ind];
-                int sep = cur.IndexOf(':');
-                Fact f = new Fact(cur.Substring(0, sep - 1), cur.Substring(sep + 2));
+                int sep1 = cur.IndexOf(':');
+                int sep2 = cur.IndexOf(';');
+                Fact f = new Fact(cur.Substring(0, sep1 - 1), cur.Substring(sep1 + 2, sep2 - sep1 - 3), double.Parse(cur.Substring(sep2 + 2)));
                 all_notices[f.Id] = f;
                 cur_ind++;
             }
@@ -100,12 +101,12 @@ namespace ProductionSystem
             }
         }
 
-        private void fill_checked_list_with_cities()
+        private void fill_checked_list_with_countries()
         {
-            checkedListBox1.Items.Clear();
+            checkedListBox2.Items.Clear();
             foreach (var t in all_terminals)
             {
-                checkedListBox1.Items.Add(t.Value.Value);
+                checkedListBox2.Items.Add(t.Value.Value);
             }
         }
 
@@ -128,11 +129,13 @@ namespace ProductionSystem
 
             pictureBox1.Image = null;
             fill_checked_list_with_facts();
-            LoadCities.Hide();
+            LoadCountries.Hide();
+            checkedListBox2.Hide();
+            checkedListBox1.Width *= 2;
             RunForward.Show();
         }
 
-        private void LoadCities_Click(object sender, EventArgs e)
+        private void LoadCountries_Click(object sender, EventArgs e)
         {
             if (all_terminals.Count == 0)
             {
@@ -149,7 +152,10 @@ namespace ProductionSystem
             }
 
             pictureBox1.Image = null;
-            fill_checked_list_with_cities();
+            checkedListBox2.Show();
+            checkedListBox1.Width /= 2;
+            fill_checked_list_with_facts();
+            fill_checked_list_with_countries();
             LoadFacts.Hide();
             RunBackward.Show();
         }
@@ -161,9 +167,9 @@ namespace ProductionSystem
             richTextBox1.Text = "";
             List<string> id_choosen = new List<string>(choosen_facts.Keys);
             int step = 0;
-
-            List<Rule> rules_to_use = rules.Where(r => r.Conditions.TrueForAll(s => id_choosen.Contains(s))).ToList();
             List<Rule> used_rules = new List<Rule>();
+            List<Rule> rules_to_use = rules.Where(r => !id_choosen.Contains(r.Conclusion) && r.Conditions.TrueForAll(s => id_choosen.Contains(s) && !used_rules.Contains(r))).OrderByDescending(r => r.Weight).ToList();
+
             List<Terminal> res = new List<Terminal>();
 
             richTextBox1.Text += "Начало прямого поиска \n";
@@ -175,49 +181,43 @@ namespace ProductionSystem
                 step++;
                 richTextBox1.Text += "\nШаг #" + step + "\n";
                 richTextBox1.Text += "--------------------------------------------------------------\n";
-                richTextBox1.Text += "Применяемые правила: \n";
-                foreach(Rule r in rules_to_use)
+                richTextBox1.Text += "Применяемое правило: \n";
+                Rule r = rules_to_use.First();
+                richTextBox1.Text += r.Id + " : " + r.Conditions.First();
+                foreach (string s in r.Conditions)
                 {
-                    richTextBox1.Text += r.Id + " : " + r.Conditions.First();
-                    foreach (string s in r.Conditions)
-                    {
-                        if (s != r.Conditions.First())
-                            richTextBox1.Text += ", " + s;
-                    }
-                    richTextBox1.Text += " -> " + r.Conclusion + "\n";
+                    if (s != r.Conditions.First())
+                        richTextBox1.Text += ", " + s;
                 }
+                richTextBox1.Text += " -> " + r.Conclusion + " : " + r.Weight + "\n";
                 richTextBox1.Text += "--------------------------------------------------------------\n";
-                richTextBox1.Text += "Полученные факты: \n";
-
-                foreach(Rule r in rules_to_use)
+                richTextBox1.Text += "Полученный факт: \n";
+                if (!id_choosen.Contains(r.Conclusion))
                 {
-                    if (!id_choosen.Contains(r.Conclusion))
+                    id_choosen.Add(r.Conclusion);
+                    if (r.Conclusion.Contains("f"))
                     {
-                        id_choosen.Add(r.Conclusion);
-                        if (r.Conclusion.Contains("f"))
-                        {
-                            richTextBox1.Text += r.Conclusion + " : " + all_facts[r.Conclusion].Value + "\n";
-                        }
-                        else if (r.Conclusion.Contains("n"))
-                        {
-                            richTextBox1.Text += r.Conclusion + " : " + all_notices[r.Conclusion].Value + "\n";
-                        }
-                        else
-                        {
-                            richTextBox1.Text += r.Conclusion + " : " + all_terminals[r.Conclusion].Value + "\n";
-                            res.Add(all_terminals[r.Conclusion]);
-                        }
+                        richTextBox1.Text += r.Conclusion + " : " + all_facts[r.Conclusion].Value + "\n";
                     }
-                    used_rules.Add(r);
-                }
-
-                List<Rule> new_rules = rules.Where(r => r.Conditions.TrueForAll(s => id_choosen.Contains(s))).ToList();
-                rules_to_use.Clear();
-                foreach (Rule r in new_rules)
-                {
-                    if (!used_rules.Contains(r))
+                    else if (r.Conclusion.Contains("n"))
                     {
-                        rules_to_use.Add(r);
+                        richTextBox1.Text += r.Conclusion + " : " + all_notices[r.Conclusion].Value + "\n";
+                    }
+                    else
+                    {
+                        richTextBox1.Text += r.Conclusion + " : " + all_terminals[r.Conclusion].Value + "\n";
+                        res.Add(all_terminals[r.Conclusion]);
+                    }
+                }
+                used_rules.Add(r);
+
+                List<Rule> new_rules = rules.Where(rule => !id_choosen.Contains(rule.Conclusion) && rule.Conditions.TrueForAll(s => id_choosen.Contains(s))).OrderByDescending(rule => rule.Weight).ToList();
+                rules_to_use.Clear();
+                foreach (Rule rule in new_rules)
+                {
+                    if (!used_rules.Contains(rule))
+                    {
+                        rules_to_use.Add(rule);
                     }
                 }
             }
@@ -291,8 +291,26 @@ namespace ProductionSystem
                     if (f.Value.Value == s)
                     {
                         choosen_facts[f.Key] = f.Value;
+                        choosen_facts[f.Key].Weight = 1;
                     }
                 }
+            }
+
+            foreach (Rule r in rules)
+            {
+                double minimum = 1;
+                foreach(string s in r.Conditions)
+                {
+                    if (s.Contains('f') && !choosen_facts.Values.Contains(all_facts[s]))
+                        minimum = 0;
+
+                    if (s.Contains('n') && all_notices[s].Weight < minimum)
+                        minimum = all_notices[s].Weight;
+                }
+
+                r.Weight = minimum;
+                if (r.Conclusion.Contains('t'))
+                    r.Weight = r.Weight + 1;
             }
 
             List<Terminal> res = forward_search();
@@ -308,11 +326,23 @@ namespace ProductionSystem
             pictureBox1.Image = null;
             foreach (string s in checkedListBox1.CheckedItems)
             {
+                foreach (var f in all_facts)
+                {
+                    if (f.Value.Value == s)
+                    {
+                        choosen_facts[f.Key] = f.Value;
+                    }
+                }
+            }
+
+            foreach (string s in checkedListBox2.CheckedItems)
+            {
                 foreach (var t in all_terminals)
                 {
                     if (t.Value.Value == s)
                     {
                         choosen_terminal = t.Key;
+                        break;
                     }
                 }
             }
@@ -320,9 +350,24 @@ namespace ProductionSystem
             List<Fact> res = backward_search();
             richTextBox1.Text += "--------------------------------------------------------------\n";
             richTextBox1.Text += "\nНеобходимые факты для получения искомого терминала: \n";
+
             foreach (Fact f in res)
             {
                 richTextBox1.Text += f.Id + " : " + f.Value + "\n";
+            }
+            richTextBox1.Text += "\nВыбранные факты: \n";
+            foreach (Fact f in choosen_facts.Values)
+            {
+                richTextBox1.Text += f.Id + " : " + f.Value + "\n";
+            }
+
+            if (res.TrueForAll(r => choosen_facts.Values.Contains(r)))
+            {
+                richTextBox1.Text += "\nТерминал выводим в данной системе из этих фактов \n";
+            }
+            else
+            {
+                richTextBox1.Text += "\nТерминал не выводим в данной системе из этих фактов \n";
             }
             pictureBox1.Image = new Bitmap(all_terminals[choosen_terminal].Img);
 
@@ -331,15 +376,18 @@ namespace ProductionSystem
         private void ClearButton_Click(object sender, EventArgs e)
         {
             LoadFacts.Show();
-            LoadCities.Show();
+            LoadCountries.Show();
             RunBackward.Hide();
             RunForward.Hide();
+            checkedListBox2.Hide();
+            checkedListBox1.Width = checkedListBox2.Width * 2;
             checkedListBox1.Items.Clear();
+            checkedListBox2.Items.Clear();
             pictureBox1.Image = null;
             richTextBox1.Text = "";
         }
 
-        private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
+        private void checkedListBox2_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             var list = sender as CheckedListBox;
             if (e.NewValue == CheckState.Checked && RunBackward.Visible)

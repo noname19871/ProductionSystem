@@ -14,7 +14,7 @@ namespace ProductionSystem
 
         private string conclusion;
 
-        private int order;
+        private double weight;
 
         public string Id { get { return id; } }
 
@@ -22,14 +22,14 @@ namespace ProductionSystem
 
         public string Conclusion { get { return conclusion; } }
 
-        public int Order { get { return order; } set { order = value; } }
+        public double Weight { get { return weight; } set { weight = value; } }
 
         public Rule (string i, List<string> cond, string concl)
         {
             id = i;
             conditions = cond;
             conclusion = concl;
-            order = 0;
+            weight = 0;
         }
     }
 }

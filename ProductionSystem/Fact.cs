@@ -11,15 +11,19 @@ namespace ProductionSystem
         
         private string id;
         private string value;
+        private double weight;
 
         public string Id { get { return id; } }
 
         public string Value { get { return value; } }
 
-        public Fact(string i, string val)
+        public double Weight { get { return weight; } set { weight = value; } }
+
+        public Fact(string i, string val, double w)
         {
             id = i;
             value = val;
+            weight = w;
         }
     }
 }
