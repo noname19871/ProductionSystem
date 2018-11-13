@@ -152,8 +152,11 @@ namespace ProductionSystem
             }
 
             pictureBox1.Image = null;
-            checkedListBox2.Show();
-            checkedListBox1.Width /= 2;
+            if (!checkedListBox2.Visible)
+            {
+                checkedListBox2.Show();
+                checkedListBox1.Width /= 2;
+            }
             fill_checked_list_with_facts();
             fill_checked_list_with_countries();
             LoadFacts.Hide();
@@ -250,6 +253,8 @@ namespace ProductionSystem
                 {
                     if (r.Conclusion == id_to_search)
                     {
+                        if (r.Conditions.Any(s => s.Contains('f')) && !r.Conditions.Where(s => s.Contains('f')).ToList().TrueForAll(s => choosen_facts.Keys.Contains(s)))
+                            continue;
                         richTextBox1.Text += r.Id + " : " + r.Conditions.First();
                         foreach (string s in r.Conditions)
                         {
@@ -270,10 +275,8 @@ namespace ProductionSystem
                             {
                                 used_notices.Add(all_notices[s]);
                                 id_choosen.Add(s);
-                                richTextBox1.Text += s + " : " + all_notices[s].Value + "\n";
                             }
                         }
-                        break;
                     }
                 }
 
@@ -324,6 +327,7 @@ namespace ProductionSystem
         private void RunBackward_Click(object sender, EventArgs e)
         {
             pictureBox1.Image = null;
+            choosen_facts.Clear();
             foreach (string s in checkedListBox1.CheckedItems)
             {
                 foreach (var f in all_facts)
@@ -349,11 +353,12 @@ namespace ProductionSystem
 
             List<Fact> res = backward_search();
             richTextBox1.Text += "--------------------------------------------------------------\n";
-            richTextBox1.Text += "\nНеобходимые факты для получения искомого терминала: \n";
+            richTextBox1.Text += "\nФакты из которых можно получить искомый терминал: \n";
 
             foreach (Fact f in res)
             {
-                richTextBox1.Text += f.Id + " : " + f.Value + "\n";
+                if (f.Id.Contains('f'))
+                    richTextBox1.Text += f.Id + " : " + f.Value + "\n";
             }
             richTextBox1.Text += "\nВыбранные факты: \n";
             foreach (Fact f in choosen_facts.Values)
