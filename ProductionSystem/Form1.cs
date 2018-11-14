@@ -131,7 +131,8 @@ namespace ProductionSystem
             fill_checked_list_with_facts();
             LoadCountries.Hide();
             checkedListBox2.Hide();
-            checkedListBox1.Width *= 2;
+            if(checkedListBox1.Width == 332)
+                checkedListBox1.Width = 664;
             RunForward.Show();
         }
 
@@ -155,7 +156,7 @@ namespace ProductionSystem
             if (!checkedListBox2.Visible)
             {
                 checkedListBox2.Show();
-                checkedListBox1.Width /= 2;
+                checkedListBox1.Width = 332;
             }
             fill_checked_list_with_facts();
             fill_checked_list_with_countries();
@@ -165,7 +166,7 @@ namespace ProductionSystem
 
 
 
-        private List<Terminal> forward_search()
+        private Dictionary<double, Terminal> forward_search()
         {
             richTextBox1.Text = "";
             List<string> id_choosen = new List<string>(choosen_facts.Keys);
@@ -173,7 +174,7 @@ namespace ProductionSystem
             List<Rule> used_rules = new List<Rule>();
             List<Rule> rules_to_use = rules.Where(r => !id_choosen.Contains(r.Conclusion) && r.Conditions.TrueForAll(s => id_choosen.Contains(s) && !used_rules.Contains(r))).OrderByDescending(r => r.Weight).ToList();
 
-            List<Terminal> res = new List<Terminal>();
+            Dictionary<double, Terminal> res = new Dictionary<double, Terminal>();
 
             richTextBox1.Text += "Начало прямого поиска \n";
             richTextBox1.Text += "Введенные факты: \n";
@@ -192,7 +193,15 @@ namespace ProductionSystem
                     if (s != r.Conditions.First())
                         richTextBox1.Text += ", " + s;
                 }
-                richTextBox1.Text += " -> " + r.Conclusion + " : " + r.Weight + "\n";
+                if (r.Conclusion.Contains('t'))
+                {
+                    richTextBox1.Text += " -> " + r.Conclusion + " : " + (r.Weight - 1) + "\n";
+                }
+                else
+                {
+                    richTextBox1.Text += " -> " + r.Conclusion + " : " + r.Weight + "\n";
+                }
+
                 richTextBox1.Text += "--------------------------------------------------------------\n";
                 richTextBox1.Text += "Полученный факт: \n";
                 if (!id_choosen.Contains(r.Conclusion))
@@ -209,7 +218,7 @@ namespace ProductionSystem
                     else
                     {
                         richTextBox1.Text += r.Conclusion + " : " + all_terminals[r.Conclusion].Value + "\n";
-                        res.Add(all_terminals[r.Conclusion]);
+                        res[r.Weight] =  all_terminals[r.Conclusion];
                     }
                 }
                 used_rules.Add(r);
@@ -287,6 +296,7 @@ namespace ProductionSystem
         private void RunForward_Click(object sender, EventArgs e)
         {
             pictureBox1.Image = null;
+            choosen_facts.Clear();
             foreach(string s in checkedListBox1.CheckedItems)
             {
                 foreach(var f in all_facts)
@@ -316,9 +326,13 @@ namespace ProductionSystem
                     r.Weight = r.Weight + 1;
             }
 
-            List<Terminal> res = forward_search();
+            Dictionary<double, Terminal> res = forward_search();
             if (res.Count != 0)
-                pictureBox1.Image = new Bitmap(res.First().Img);
+            {
+                double maximum = res.Keys.Max();
+                pictureBox1.Image = new Bitmap(res[maximum].Img);
+            }
+
             choosen_facts.Clear();
         }
 
@@ -366,7 +380,7 @@ namespace ProductionSystem
                 richTextBox1.Text += f.Id + " : " + f.Value + "\n";
             }
 
-            if (res.TrueForAll(r => choosen_facts.Values.Contains(r)))
+            if (res.TrueForAll(r => choosen_facts.Values.Contains(r)) && res.Count != 0)
             {
                 richTextBox1.Text += "\nТерминал выводим в данной системе из этих фактов \n";
             }
